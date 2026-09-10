@@ -5,11 +5,21 @@ function love.load()
 	boxes[1] = {0,0}
 	boxes[2] = {0,0}
 	level = #boxes - 1
-	score = 0
+	score = 9
 
 end
 
 function love.update(dt)
+	if plus == true then
+		local b = #boxes +1
+		for i=1,b do
+			boxes[i] = {}
+			for j=1,b do
+				boxes[i][j] = 0
+			end
+		end
+		plus = false
+	end
 	wid, hei = love.window.getMode()
 	if wid > hei then
 		gbox = hei*0.95
@@ -23,20 +33,14 @@ function love.update(dt)
 		for j,w in ipairs(v) do
 			if collision(((wid-gbox)/2)+gap+(gap*5*(i-1)),((hei-gbox)/2)+gap+(gap*5*(j-1)),gap*4,gap*4,mx,my,0,0) then
 				boxes[i][j] = 1
-				score = score+1
 			else
 				boxes[i][j] = 0
 			end
 		end
 	end
 	if score%20==9 then
-		local a = boxes[1]
-		a[#a+1] = 0
-		local b = #boxes +1
-		boxes = {}
-		for i=1,b do
-			boxes[#boxes+1] = a
-		end
+		plus = true
+		score = score +1
 	end
 
 end
