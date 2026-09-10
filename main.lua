@@ -5,6 +5,7 @@ function love.load()
 	boxes[1] = {0,0}
 	boxes[2] = {0,0}
 	level = #boxes - 1
+	score = 0
 
 end
 
@@ -15,18 +16,29 @@ function love.update(dt)
 	else
 		gbox = wid+0.95
 	end
-	gap = gbox/((#boxes)*4 + level+2)
+	gap = gbox/((#boxes)*4 + #boxes+1)
 
 	mx, my = love.mouse.getPosition()
 	for i,v in ipairs(boxes) do
 		for j,w in ipairs(v) do
 			if collision(((wid-gbox)/2)+gap+(gap*5*(i-1)),((hei-gbox)/2)+gap+(gap*5*(j-1)),gap*4,gap*4,mx,my,0,0) then
 				boxes[i][j] = 1
+				score = score+1
 			else
 				boxes[i][j] = 0
 			end
 		end
 	end
+	if score%20==9 then
+		local a = boxes[1]
+		a[#a+1] = 0
+		local b = #boxes +1
+		boxes = {}
+		for i=1,b do
+			boxes[#boxes+1] = a
+		end
+	end
+
 end
 
 function love.draw()
