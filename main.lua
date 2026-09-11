@@ -6,7 +6,7 @@ function love.load()
 	boxes[2] = {0,0}
 	level = #boxes - 1
 	score = 0
-    startGame()
+	startGame()
 end
 
 function love.update(dt)
@@ -29,36 +29,34 @@ function love.update(dt)
     if isClear() then
         local ran = 0
         score = score + 1
-        if score%5==0 then
-            plus()
-        end
-        by,bx = boxTouch()
-        if bx == 1 then
-            while not bx == #boxes do
+	clearBoxes()
+        bi,bj = boxTouch()
+        if bj == 1 then
+            while not bj == #boxes do
                 ran = love.math.random(3)
                 if ran == 1 then
-                    bx = bx + 1
-                    boxes[bx][by] = 1
-                elseif ran == 2 and by > 1 then
-                    by = by - 1
-                    boxes[bx][by] = 1
-                elseif ran == 3 and by < #boxes then
-                    by = by + 1
-                    boxes[bx][by] = 1
+                    bj = bj + 1
+                    boxes[bi][bj] = 1
+                elseif ran == 2 and bi > 1 then
+                    bi = bi - 1
+                    boxes[bi][bj] = 1
+                elseif ran == 3 and bi < #boxes then
+                    bi = bi + 1
+                    boxes[bi][bj] = 1
                 end
             end
         else
-            while not bx == 1 do
+            while not bj == 1 do
                 ran = love.math.random(3)
                 if ran == 1 then
-                    bx = bx - 1
-                    boxes[bx][by] = 1
-                elseif ran == 2 and by > 1 then
-                    by = by - 1
-                    boxes[bx][by] = 1
-                elseif ran == 3 and by < #boxes then
-                    by = by + 1
-                    boxes[bx][by] = 1
+                    bj = bj - 1
+                    boxes[bi][bj] = 1
+                elseif ran == 2 and bi > 1 then
+                    bi = bi - 1
+                    boxes[bi][bj] = 1
+                elseif ran == 3 and bi < #boxes then
+                    bi = bi + 1
+                    boxes[bi][bj] = 1
                 end
             end
         end
@@ -95,7 +93,7 @@ function collision(x1,y1,w1,h1, x2,y2,w2,h2)
 end
 
 function startGame()
-    boxes[#boxes][#boxes] = 3
+    boxes[1][1] = 3
 end
 
 function isClear()
@@ -114,10 +112,18 @@ function isClear()
         end
     end
     return clear
-
+end
+function clearBoxes()
+    local b = #boxes
+    for i=1,b do
+        boxes[i] = {}
+        for j=1,b do
+            boxes[i][j] = 0
+        end
+    end
 end
 function plus()
-    local x,y = 0,0
+    local i,j = 0,0
     local b = #boxes +1
     for i=1,b do
         boxes[i] = {}
@@ -125,8 +131,8 @@ function plus()
             boxes[i][j] = 0
         end
     end
-    x,y = boxTouch()
-    boxes[x][y] = 1 
+    i,j = boxTouch()
+    boxes[i][j] = 1 
 end
 function boxTouch()
     local x,y = 0,0
