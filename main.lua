@@ -5,21 +5,12 @@ function love.load()
 	boxes[1] = {0,0}
 	boxes[2] = {0,0}
 	level = #boxes - 1
-	score = 9
-
+	score = 0
+    startGame()
 end
 
 function love.update(dt)
-	if plus == true then
-		local b = #boxes +1
-		for i=1,b do
-			boxes[i] = {}
-			for j=1,b do
-				boxes[i][j] = 0
-			end
-		end
-		plus = false
-	end
+	mx, my = love.mouse.getPosition()
 	wid, hei = love.window.getMode()
 	if wid > hei then
 		gbox = hei*0.95
@@ -28,21 +19,50 @@ function love.update(dt)
 	end
 	gap = gbox/((#boxes)*4 + #boxes+1)
 
-	mx, my = love.mouse.getPosition()
 	for i,v in ipairs(boxes) do
 		for j,w in ipairs(v) do
-			if collision(((wid-gbox)/2)+gap+(gap*5*(i-1)),((hei-gbox)/2)+gap+(gap*5*(j-1)),gap*4,gap*4,mx,my,0,0) then
-				boxes[i][j] = 1
-			else
-				boxes[i][j] = 0
+			if collision(((wid-gbox)/2)+gap+(gap*5*(i-1)),((hei-gbox)/2)+gap+(gap*5*(j-1)),gap*4,gap*4,mx,my,0,0) and boxes[i][j] > 0 then
+				boxes[i][j] = 2
 			end
 		end
 	end
-	if score%20==9 then
-		plus = true
-		score = score +1
-	end
-
+    if isClear() then
+        local ran = 0
+        score = score + 1
+        if score%5==0 then
+            plus()
+        end
+        by,bx = boxTouch()
+        if bx == 1 then
+            while not bx == #boxes do
+                ran = love.math.random(3)
+                if ran == 1 then
+                    bx = bx + 1
+                    boxes[bx][by] = 1
+                elseif ran == 2 and by > 1 then
+                    by = by - 1
+                    boxes[bx][by] = 1
+                elseif ran == 3 and by < #boxes then
+                    by = by + 1
+                    boxes[bx][by] = 1
+                end
+            end
+        else
+            while not bx == 1 do
+                ran = love.math.random(3)
+                if ran == 1 then
+                    bx = bx - 1
+                    boxes[bx][by] = 1
+                elseif ran == 2 and by > 1 then
+                    by = by - 1
+                    boxes[bx][by] = 1
+                elseif ran == 3 and by < #boxes then
+                    by = by + 1
+                    boxes[bx][by] = 1
+                end
+            end
+        end
+    end
 end
 
 function love.draw()
@@ -72,4 +92,50 @@ function collision(x1,y1,w1,h1, x2,y2,w2,h2)
          x2 < x1+w1 and
          y1 < y2+h2 and
          y2 < y1+h1
+end
+
+function startGame()
+    boxes[#boxes][#boxes] = 3
+end
+
+function isClear()
+    clear = true
+    for i,v in ipairs(boxes) do
+        for j,w in ipairs(v) do
+            if w == 1 or w > 2 then
+                clear = false
+            end
+            if not clear then
+                break
+            end
+        end
+        if not clear then 
+            break
+        end
+    end
+    return clear
+
+end
+function plus()
+    local x,y = 0,0
+    local b = #boxes +1
+    for i=1,b do
+        boxes[i] = {}
+        for j=1,b do
+            boxes[i][j] = 0
+        end
+    end
+    x,y = boxTouch()
+    boxes[x][y] = 1 
+end
+function boxTouch()
+    local x,y = 0,0
+    for i,v in ipairs(boxes) do
+        for j,w in ipairs(v) do
+            if collision(((wid-gbox)/2)+gap+(gap*5*(i-1)),((hei-gbox)/2)+gap+(gap*5*(j-1)),gap*4,gap*4,mx,my,0,0) then
+                x,y = i,j
+            end
+        end
+    end
+    return x,y
 end
