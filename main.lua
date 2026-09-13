@@ -1,6 +1,12 @@
 function love.load()
 	love.window.setMode(1024, 768, {vsync= 1, resizable = true, minwidth = 640, minheight = 480})
 	love.window.setTitle("Speed maze")
+	font = love.graphics.newFont(32)
+	hit = love.audio.newSource("hitsound.wav", "static")
+	reset = love.audio.newSource("reset.wav", "static")
+	lups = love.audio.newSource("lup.wav", "static")
+	score = 0
+	best = 0
 	startGame()
 end
 
@@ -16,29 +22,34 @@ function love.update(dt)
 
 	for i,v in ipairs(boxes) do
 		for j,w in ipairs(v) do
-			if collision(((wid-gbox)/2)+gap+(gap*5*(i-1)),((hei-gbox)/2)+gap+(gap*5*(j-1)),gap*4,gap*4,mx,my,0,0) and boxes[i][j] > 0 then
+			if collision(((hei-gbox)/2)+gap+(gap*5*(i-1)),((hei-gbox)/2)+gap+(gap*5*(j-1)),gap*4,gap*4,mx,my,0,0) and boxes[i][j] > 2 then
 				boxes[i][j] = 2
+				love.audio.play(hit)
 			end
 		end
 	end
     if isClear() then
+	love.audio.play(lups)
         local ran1 = 0
         local ran2 = 0
 	local r = 0
-	local ti, tj = boxTouch()
+	r = 0.4 * #boxes * #boxes
         score = score + 1
 	lup = lup + 1
 	if level == 1 then
+		r = 0.6 * #boxes * #boxes
 		if lup > 3 then 
 			lup = 0
 			plus()
 		end
 	elseif level == 2 then 
+		r = 0.45 * #boxes * #boxes
 		if lup > 6 then 
 			lup = 0
 			plus()
 		end
 	elseif level == 3 then 
+		r = 0.45 * #boxes * #boxes
 		if lup > 9 then 
 			lup = 0
 			plus()
@@ -59,8 +70,8 @@ function love.update(dt)
 			plus()
 		end
 	end
+	local ti, tj = boxTouch()
 	clearBoxes()
-	r = 0.3 * #boxes * #boxes
 	for i = 1, r do
 		ran1 = love.math.random(#boxes) 
 		ran2 = love.math.random(#boxes) 
@@ -68,9 +79,14 @@ function love.update(dt)
 			r = r + 1
 			goto continue
 		end
-		boxes[ran1][ran2] = 1
+		boxes[ran1][ran2] = 3
 		::continue::
 	end
+	timer = timer + 60
+    end
+    timer = timer - 1
+    if timer == 0 then
+	startGame()
     end
 end
 
@@ -79,7 +95,16 @@ function love.draw()
 	love.graphics.setColor(149/225,162/225,135/225)
 	love.graphics.rectangle("fill",0,0,wid,hei)
 	love.graphics.setColor(230/225,238/225,231/225)
-	love.graphics.rectangle("fill",(wid-gbox)/2,(hei-gbox)/2,gbox,gbox,5,5)
+	love.graphics.rectangle("fill",(hei-gbox)/2,(hei-gbox)/2,gbox,gbox,5,5)
+
+	love.graphics.print("Score:", font, hei, 20)
+	love.graphics.print(score, font, hei, 57)
+
+	love.graphics.print("Time:", font, hei, 120)
+	love.graphics.print(string.format("%5.2f", timer/60), font, hei, 157)
+
+	love.graphics.print("Best score:", font, hei, 300)
+	love.graphics.print(best, font, hei, 342)
 
 	for i,v in ipairs(boxes) do
 		for j,w in ipairs(v) do
@@ -93,7 +118,7 @@ function love.draw()
 			else
 				love.graphics.setColor(189/225,148/225,112/225)
 			end
-			love.graphics.rectangle("fill",((wid-gbox)/2)+gap+(gap*5*(i-1)),((hei-gbox)/2)+gap+(gap*5*(j-1)),gap*4,gap*4,5,5)
+			love.graphics.rectangle("fill",((hei-gbox)/2)+gap+(gap*5*(i-1)),((hei-gbox)/2)+gap+(gap*5*(j-1)),gap*4,gap*4,5,5)
 		end
 	end
 end
@@ -106,15 +131,20 @@ function collision(x1,y1,w1,h1, x2,y2,w2,h2)
 end
 
 function startGame()
+	if score > best then
+		best = score
+	end
 	boxes = {}
 	boxes[1] = {0,0}
 	boxes[2] = {0,0}
 	level = #boxes - 1
 	score = 0
+	timer = 180
 	lup = 0
 	local ran1 = love.math.random(2)
 	local ran2 = love.math.random(2)
 	boxes[ran1][ran2] = 3
+	love.audio.play(reset)
 end
 
 function isClear()
@@ -158,7 +188,7 @@ function boxTouch()
     local x,y = 0,0
     for i,v in ipairs(boxes) do
         for j,w in ipairs(v) do
-            if collision(((wid-gbox)/2)+gap+(gap*5*(i-1)),((hei-gbox)/2)+gap+(gap*5*(j-1)),gap*4,gap*4,mx,my,0,0) then
+            if collision(((hei-gbox)/2)+gap+(gap*5*(i-1)),((hei-gbox)/2)+gap+(gap*5*(j-1)),gap*4,gap*4,mx,my,0,0) then
                 x,y = i,j
             end
         end
