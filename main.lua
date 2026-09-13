@@ -1,11 +1,6 @@
 function love.load()
 	love.window.setMode(1024, 768, {vsync= 1, resizable = true, minwidth = 640, minheight = 480})
 	love.window.setTitle("Speed maze")
-	boxes = {}
-	boxes[1] = {0,0}
-	boxes[2] = {0,0}
-	level = #boxes - 1
-	score = 0
 	startGame()
 end
 
@@ -27,44 +22,61 @@ function love.update(dt)
 		end
 	end
     if isClear() then
-        local ran = 0
+        local ran1 = 0
+        local ran2 = 0
+	local r = 0
+	local ti, tj = boxTouch()
         score = score + 1
+	lup = lup + 1
+	if level == 1 then
+		if lup > 3 then 
+			lup = 0
+			plus()
+		end
+	elseif level == 2 then 
+		if lup > 6 then 
+			lup = 0
+			plus()
+		end
+	elseif level == 3 then 
+		if lup > 9 then 
+			lup = 0
+			plus()
+		end
+	elseif level == 4 then 
+		if lup > 14 then 
+			lup = 0
+			plus()
+		end
+	elseif level < 7 then 
+		if lup > 19 then
+			lup = 0
+			plus()
+		end
+	else
+		if lup > 29 then
+			lup = 0
+			plus()
+		end
+	end
 	clearBoxes()
-        bi,bj = boxTouch()
-        if bj == 1 then
-            while not bj == #boxes do
-                ran = love.math.random(3)
-                if ran == 1 then
-                    bj = bj + 1
-                    boxes[bi][bj] = 1
-                elseif ran == 2 and bi > 1 then
-                    bi = bi - 1
-                    boxes[bi][bj] = 1
-                elseif ran == 3 and bi < #boxes then
-                    bi = bi + 1
-                    boxes[bi][bj] = 1
-                end
-            end
-        else
-            while not bj == 1 do
-                ran = love.math.random(3)
-                if ran == 1 then
-                    bj = bj - 1
-                    boxes[bi][bj] = 1
-                elseif ran == 2 and bi > 1 then
-                    bi = bi - 1
-                    boxes[bi][bj] = 1
-                elseif ran == 3 and bi < #boxes then
-                    bi = bi + 1
-                    boxes[bi][bj] = 1
-                end
-            end
-        end
+	r = 0.3 * #boxes * #boxes
+	for i = 1, r do
+		ran1 = love.math.random(#boxes) 
+		ran2 = love.math.random(#boxes) 
+		if ran1 == ti and ran2 == tj then
+			r = r + 1
+			goto continue
+		end
+		boxes[ran1][ran2] = 1
+		::continue::
+	end
     end
 end
 
 function love.draw()
-	love.graphics.setColor(218/255,221/255,210/255)
+	-- love.graphics.setColor(218/255,221/255,210/255)
+	love.graphics.setColor(149/225,162/225,135/225)
 	love.graphics.rectangle("fill",0,0,wid,hei)
 	love.graphics.setColor(230/225,238/225,231/225)
 	love.graphics.rectangle("fill",(wid-gbox)/2,(hei-gbox)/2,gbox,gbox,5,5)
@@ -72,10 +84,11 @@ function love.draw()
 	for i,v in ipairs(boxes) do
 		for j,w in ipairs(v) do
 			if w == 0 then
-				love.graphics.setColor(149/225,162/225,135/225)
-			elseif w == 1 then
-				love.graphics.setColor(213/225,189/225,166/225)
+				-- love.graphics.setColor(149/225,162/225,135/225)
+				love.graphics.setColor(218/255,221/255,210/255)
 			elseif w == 2 then
+				love.graphics.setColor(213/225,189/225,166/225)
+			elseif w == 1 then
 				love.graphics.setColor(189/225,148/225,112/225)
 			else
 				love.graphics.setColor(189/225,148/225,112/225)
@@ -93,7 +106,15 @@ function collision(x1,y1,w1,h1, x2,y2,w2,h2)
 end
 
 function startGame()
-    boxes[1][1] = 3
+	boxes = {}
+	boxes[1] = {0,0}
+	boxes[2] = {0,0}
+	level = #boxes - 1
+	score = 0
+	lup = 0
+	local ran1 = love.math.random(2)
+	local ran2 = love.math.random(2)
+	boxes[ran1][ran2] = 3
 end
 
 function isClear()
@@ -131,8 +152,7 @@ function plus()
             boxes[i][j] = 0
         end
     end
-    i,j = boxTouch()
-    boxes[i][j] = 1 
+    level = #boxes - 1
 end
 function boxTouch()
     local x,y = 0,0
